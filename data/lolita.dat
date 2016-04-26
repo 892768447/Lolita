@@ -1,0 +1,18 @@
+{
+    "normal" : "{DATA_DIR}/lolita/kiana-1.png",
+    "move" : "{DATA_DIR}/lolita/kiana-2.png",
+    "hover" : "{DATA_DIR}/lolita/kiana-3.gif",
+    "press" : "{DATA_DIR}/lolita/kiana-4.png",
+    "playList" : [["drag", "{DATA_DIR}/lolita/voice/kiana_drag.mp3"],
+        ["快看快看，我抽到了什么~", "{DATA_DIR}/lolita/voice/kiana_1.mp3"],
+        ["去死去死去死去死！", "{DATA_DIR}/lolita/voice/kiana_2.mp3"],
+        ["主人，人家钱包都空了", "{DATA_DIR}/lolita/voice/kiana_3.mp3"],
+        ["变态！", "{DATA_DIR}/lolita/voice/kiana_4.mp3"],
+        ["Kiana，变身！", "{DATA_DIR}/lolita/voice/kiana_5.mp3"],
+        ["嗯，miHoYo什么的，最讨厌了~", "{DATA_DIR}/lolita/voice/kiana_6.mp3"],
+        ["千万别小看我哟~", "{DATA_DIR}/lolita/voice/kiana_7.mp3"],
+        ["要加油哦！", "{DATA_DIR}/lolita/voice/kiana_8.mp3"],
+        ["我就知道主人最疼人家啦~", "{DATA_DIR}/lolita/voice/kiana_9.mp3"],
+        ["锵锵~", "{DATA_DIR}/lolita/voice/kiana_10.mp3"],
+        ["烦死啦，走开走开啦！", "{DATA_DIR}/lolita/voice/kiana_11.mp3"]]
+}
