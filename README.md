@@ -1,9 +1,9 @@
 # Lolita
-PyQt5 Lolita Widget(ĞèÒªPython3.4ºÍPyQt5)
+PyQt5 Lolita Widget
 
-<br/>
-½ÏÖ®Ç°µÄ°æ±¾£¬±¾´ÎÖ÷ÒªÊÇÈ¡ÏûqssÎÄ¼ş£¬ÍêÈ«ÓÃÄ£¿éÊµÏÖ¡£
+#æ”¯æŒPython2-PyQt4 å’Œ Python3-PyQt5
+
 </br><a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=2bb32624097216e9c0b9ef1b5fd8afeb63917d661a609786cf5638303caa0a8e"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="PyQt Ui" title="PyQt Ui"></a>
 
-## Ô¤ÀÀÍ¼(Ô¤ÀÀÍ¼)-[lolita.py](https://github.com/892768447/Lolita/blob/master/lolita.py)
-  </br><img src="https://github.com/892768447/Lolita/blob/master/screenshot.gif" />
+## é¢„è§ˆå›¾(é¢„è§ˆå›¾)-[lolita.py](https://github.com/892768447/Lolita/blob/master/lolita.py)
+  </br><img src="https://github.com/892768447/Lolita/blob/master/lolita.gif" />

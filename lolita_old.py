@@ -10,27 +10,80 @@ Created on 2016年4月25日
 @description: 可拖动小萝莉
 '''
 
+from PyQt5.Qt import Qt
+from PyQt5.QtCore import QUrl, QPoint
+from PyQt5.QtGui import QImage, QMovie
+from PyQt5.QtMultimedia import QMediaPlaylist, QMediaContent, QMediaPlayer
+from PyQt5.QtWidgets import QLabel, QToolTip
 import json
 import sys, os
 import traceback
 
 
-PY3 = sys.version_info.major >= 3
-
-if PY3:
-    from PyQt5.QtCore import Qt, QPoint    # @UnusedImport @UnresolvedImport
-    from PyQt5.QtGui import QPixmap, QMovie, QPainter    # @UnusedImport @UnresolvedImport
-    from PyQt5.QtWidgets import QLabel, QToolTip    # @UnusedImport @UnresolvedImport
-    from player3 import LolitaPlayer    # @UnusedImport
-else:
-    from PyQt4.QtCore import Qt, QPoint    # @UnresolvedImport @Reimport
-    from PyQt4.QtGui import QLabel, QPixmap, QMovie, QPainter, QToolTip    # @UnresolvedImport @Reimport
-    from player2 import LolitaPlayer    # @Reimport
-
 __Author__ = "By: Irony.\"[讽刺]\nQQ: 892768447\nEmail: 892768447@qq.com"
 __Copyright__ = "Copyright (c) 2015 Irony.\"[讽刺]"
 __Version__ = "Version 1.0"
 
+class LolitaPlayer(QMediaPlayer):
+    """控制萝莉声音"""
+
+    def __init__(self, playList = [], ddir = "data", parent = None):
+        """
+        @param dfile: 萝莉的音乐配置文件
+        """
+        QMediaPlayer.__init__(self, parent)
+        # super(LolitaMusic, self).__init__(parent)
+        try:
+            # 播放列表
+            self.playList = QMediaPlaylist(parent)
+            # 设置只播放一次
+            self.playList.setPlaybackMode(QMediaPlaylist.CurrentItemOnce)
+            # 读取配置文件中的音乐路径
+            self._playList = playList
+            # 添加到列表里
+            self.playList.addMedia([QMediaContent(QUrl(item[1].format(DATA_DIR = ddir))) for item in self._playList])
+            self.playList.setCurrentIndex(0)
+
+            # 设置播放列表
+            self.setPlaylist(self.playList)
+            # 设置音量
+            self.setVolume(100)
+        except Exception as e:
+            traceback.print_exc(e)
+
+    def __del__(self):
+        if hasattr(self, "playList"):
+            del self.playList
+
+    def currentIndex(self):
+        if hasattr(self, "playList"):
+            return self.playList.currentIndex()
+        return 0
+
+    def mediaCount(self):
+        if hasattr(self, "_playList"):
+            return len(self._playList)
+        return 0
+
+    def setCurrentIndex(self, i):
+        if hasattr(self, "playList"):
+            self.playList.setCurrentIndex(i)
+
+    def getText(self, i):
+        """获取当前歌曲对应的文字"""
+        if hasattr(self, "_playList"):
+            try: return self._playList[i][0]
+            except Exception as e: traceback.print_exc(e)
+        return ""
+
+    def play(self, i):
+        """播放指定的歌曲"""
+        if hasattr(self, "playList"):
+            self.playList.setCurrentIndex(i)    # 切换到第几首
+            QMediaPlayer.play(self)    # 播放一次
+
+    def stop(self):
+        QMediaPlayer.stop(self)
 
 class Lolita(QLabel):
     """小萝莉"""
@@ -52,27 +105,26 @@ class Lolita(QLabel):
     def init(self, ddir):
         """加载lolita.dat配置"""
         try:
-            if PY3: conf = json.loads(open(ddir + "/lolita.dat", "rb").read().decode())
-            else: conf = json.loads(open(ddir + "/lolita.dat", "rb").read(), "utf-8")
+            conf = json.loads(open(ddir + "/lolita.dat", "rb").read().decode())
             normal = conf.get("normal", "").format(DATA_DIR = ddir)
             move = conf.get("move", "").format(DATA_DIR = ddir)
             hover = conf.get("hover", "").format(DATA_DIR = ddir)
             press = conf.get("press", "").format(DATA_DIR = ddir)
 
-            image = QPixmap(normal)
+            image = QImage(normal)
             self.resize(image.size())    # 设置窗口的大小
             self.setMinimumSize(image.size())
             self.setMaximumSize((image.size()))
+            del image
 
             self.movies = {
-                "normal": image,    # 普通
-                "move": QPixmap(move),    # 移动
+                "normal": QMovie(normal),    # 普通
+                "move": QMovie(move),    # 移动
                 "hover": QMovie(hover),    # 悬停(会动)
-                "press": QPixmap(press),    # 按下
+                "press": QMovie(press),    # 按下
             }
 
-            self._currentImage = image    # 当前的图形
-            self.update()
+            self.setMovie(self.movies.get("normal")).start()    # 默认显示
 
             # 声音播放列表
             playList = conf.get("playList", [])
@@ -83,16 +135,17 @@ class Lolita(QLabel):
             traceback.print_exc(e)
 
     def exit(self):
-        self.setMovie(None)
         if hasattr(self, "movies"):
-            self.movies.get("hover").stop()
-            for k in ("normal", "move", "hover", "press"):
-                _m = self.movies.pop(k)
-                del _m
+            for _, movie in self.movies.items():
+                movie.stop()
             del self.movies
         if hasattr(self, "player"):
             self.player.stop()
             del self.player
+        self.setMovie(None)
+        # 如果主窗口加载该部件则不要调用exit函数。只调用close
+        # 如果是该文件单独演示则调用exit
+        QApplication.instance().quit()
 
     def setMovie(self, movie):
         QLabel.setMovie(self, movie)
@@ -101,26 +154,20 @@ class Lolita(QLabel):
     def _change_image_(self, name):
         if not hasattr(self, "movies"): return
         if name not in self.movies: return
-        self._currentImage = self.movies.get(name)
-        if name == "hover": self.setMovie(self._currentImage).start()
-        else: self.movies.get("hover").stop()
-
-    def paintEvent(self, event):
-        if not hasattr(self, "_currentImage"):
-            return super(Lolita, self).paintEvent(event)
-        if isinstance(self._currentImage, QMovie):    # 动画
-            return super(Lolita, self).paintEvent(event)
-        painter = QPainter(self)
-        painter.drawPixmap(0, 0, self._currentImage)
+        _movies = self.movies.copy()
+        _movie = _movies.pop(name)
+        for _, movie in _movies.items(): movie.stop()    # 停止其他的
+        _movie.stop()
+        self.setMovie(_movie).start()    # 切换到这个
 
     def mousePressEvent(self, event):
         """鼠标按下"""
         if event.button() == Qt.LeftButton:
             self.moveCanPlay = True
             self._change_image_("press")
-            self.update()
             self.mpos = event.globalPos() - self.pos()    # 记录坐标
-        super(Lolita, self).mousePressEvent(event)
+        QLabel.mousePressEvent(self, event)
+        # super(Lolita, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         """鼠标拖动"""
@@ -132,14 +179,13 @@ class Lolita(QLabel):
                 self.player.stop()
                 self.player.play(0)    # 播放drag的声音
             self._change_image_("move")
-            self.update()
-        super(Lolita, self).mouseMoveEvent(event)
+        QLabel.mouseMoveEvent(self, event)
+        # super(Lolita, self).mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
         """鼠标释放"""
         if event.button() == Qt.LeftButton:
             self._change_image_("normal")
-            self.update()
             self.moveCanPlay = False
             if not self.canPlay:    # 移动了,不播放
                 self.canPlay = True
@@ -151,36 +197,34 @@ class Lolita(QLabel):
             self.player.play(self.cindex)    # 播放
             text = self.player.getText(self.cindex)
             QToolTip.showText(self.pos() + QPoint(0, -50), text, self)
-        super(Lolita, self).mouseReleaseEvent(event)
+        QLabel.mouseReleaseEvent(self, event)
+        # super(Lolita, self).mouseReleaseEvent(event)
 
     def enterEvent(self, event):
         """鼠标进入"""
         self._change_image_("hover")
-        self.update()
-        super(Lolita, self).enterEvent(event)
+        return QLabel.enterEvent(self, event)
 
     def leaveEvent(self, event):
         """鼠标离开"""
         self._change_image_("normal")
-        self.update()
-        super(Lolita, self).leaveEvent(event)
+        return QLabel.leaveEvent(self, event)
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.RightButton:
             self.close()
             self.exit()
-            QApplication.instance().quit()    # 根据情况使用
-        super(Lolita, self).mouseDoubleClickEvent(event)
+        # 如果主窗口加载该部件则不要调用exit函数。只调用close
+        # 如果是该文件单独演示则调用exit
+        QLabel.mouseDoubleClickEvent(self, event)
 
 if __name__ == "__main__":
-    if PY3: from PyQt5.QtWidgets import QApplication    # @UnresolvedImport @UnusedImport
-    else: from PyQt4.QtGui import QApplication    # @Reimport @UnresolvedImport
+    from PyQt5.QtWidgets import QApplication
     app = QApplication(sys.argv)
     w = Lolita(ddir = os.path.abspath("data"))
     w.show()
     w.setStyleSheet("""
     QToolTip {
-        min-height: 20px; 
         border: 2px solid white;
         padding: 1px;
         border-radius: 3px;
