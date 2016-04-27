@@ -23,9 +23,11 @@ if PY3:
     from PyQt5.QtWidgets import QLabel, QToolTip    # @UnusedImport @UnresolvedImport
     from player3 import LolitaPlayer    # @UnusedImport
 else:
+    reload(sys)    # @UndefinedVariable
+    sys.setdefaultencoding("utf-8")    # @UndefinedVariable
     from PyQt4.QtCore import Qt, QPoint    # @UnresolvedImport @Reimport
     from PyQt4.QtGui import QLabel, QPixmap, QMovie, QPainter, QToolTip    # @UnresolvedImport @Reimport
-    from player2 import LolitaPlayer    # @Reimport
+    from player2 import LolitaPlayer    # @Reimport @UnusedImport
 
 __Author__ = "By: Irony.\"[讽刺]\nQQ: 892768447\nEmail: 892768447@qq.com"
 __Copyright__ = "Copyright (c) 2015 Irony.\"[讽刺]"
@@ -176,10 +178,11 @@ if __name__ == "__main__":
     if PY3: from PyQt5.QtWidgets import QApplication    # @UnresolvedImport @UnusedImport
     else: from PyQt4.QtGui import QApplication    # @Reimport @UnresolvedImport
     app = QApplication(sys.argv)
-    w = Lolita(ddir = os.path.abspath("data"))
+    w = Lolita(ddir = "data" if PY3 else os.path.abspath("data"))
     w.show()
     w.setStyleSheet("""
     QToolTip {
+        color: black;
         min-height: 20px; 
         border: 2px solid white;
         padding: 1px;
